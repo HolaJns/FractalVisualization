@@ -1,4 +1,4 @@
-class complex {
+class Complex {
     
     constructor(r, i) {
         if(r==null || i==null) {
@@ -48,22 +48,22 @@ class complex {
 }
 
 function add(a, b) {
-    if(!b instanceof complex || !a instanceof complex) {
+    if(!b instanceof Complex || !a instanceof Complex) {
         throw "Parameters must be of type Complex";
     }
-    return new complex(a.getReal()+b.getReal(), a.getImag()+b.getImag());
+    return new Complex(a.getReal()+b.getReal(), a.getImag()+b.getImag());
 }
 
 function multiply(a, b) {
-    if(!b instanceof complex || !a instanceof complex) {
+    if(!b instanceof Complex || !a instanceof Complex) {
         throw "Parameters must be of type Complex";
     }
-    return new complex(a.getReal()*b.getReal()-a.getImag()*b.getImag(), a.getReal()*b.getImag()+a.getImag()*b.getReal());
+    return new Complex(a.getReal()*b.getReal()-a.getImag()*b.getImag(), a.getReal()*b.getImag()+a.getImag()*b.getReal());
 }
 
 
 function f(z,c) {
-    if(!z instanceof complex ||!c instanceof complex) {
+    if(!z instanceof Complex ||!c instanceof Complex) {
         throw "Parameters must be of type Complex";
     }
     return add(multiply(z,z),c);
@@ -111,8 +111,8 @@ function sendAdd() {
     let i1 = parseFloat(document.getElementById("imag1").value);
     let r2 = parseFloat(document.getElementById("real2").value);
     let i2 = parseFloat(document.getElementById("imag2").value);
-    let a = new complex(r1, i1);
-    let b = new complex(r2, i2);
+    let a = new Complex(r1, i1);
+    let b = new Complex(r2, i2);
     document.getElementById("output").value = add(a,b).toString();
 }
 
@@ -121,22 +121,22 @@ function sendMul() {
     let i1 = parseFloat(document.getElementById("imag1").value);
     let r2 = parseFloat(document.getElementById("real2").value);
     let i2 = parseFloat(document.getElementById("imag2").value);
-    let a = new complex(r1, i1);
-    let b = new complex(r2, i2);
+    let a = new Complex(r1, i1);
+    let b = new Complex(r2, i2);
     document.getElementById("output").value = multiply(a,b).toString();
 }
 
 function sendAbs() {
     let r1 = parseFloat(document.getElementById("real1").value);
     let i1 = parseFloat(document.getElementById("imag1").value);
-    let a = new complex(r1, i1);
+    let a = new Complex(r1, i1);
     document.getElementById("output").value = a.abs();
 }
 
 function sendSqrt() {
     let r1 = parseFloat(document.getElementById("real1").value);
     let i1 = parseFloat(document.getElementById("imag1").value);
-    let a = new complex(r1, i1);
+    let a = new Complex(r1, i1);
     document.getElementById("output").value = a.sqrt();
 }
 
@@ -184,7 +184,7 @@ function coordinate_system() {
 var POV = [-2,2];
 var center = [0,0];
 var distance = POV[1]-POV[0];
-const range = 1000;
+const range = 256;
 const ctx = canvas.getContext("2d");
 var pixels_dim = canvas.width;
 var per_iteration = distance / pixels_dim;
@@ -207,10 +207,10 @@ function draw(centerX=center[0], centerY=center[1], start = POV[0], end = POV[1]
     for (var row = start; row <= end; row += per_iteration) {
         for (var column = start; column <= end; column += per_iteration) {
             var depth = 0;
-            var solution = new complex(0, 0);
+            var solution = new Complex(0, 0);
             for (var iter = 0; iter < range; iter++) {
                 if (solution.abs() >= 1000) { break; }
-                solution = f(solution, new complex(centerX + row, centerY + column));
+                solution = f(solution, new Complex(centerX + row, centerY + column));
                 depth++;
             }
             if(depth > 0*range) {
@@ -222,7 +222,7 @@ function draw(centerX=center[0], centerY=center[1], start = POV[0], end = POV[1]
 }
 
 function iterate(c, range) {
-    var solution = new complex(0,0);
+    var solution = new Complex(0,0);
     for(var i = 0; i < range; i++) {
         solution = f(solution, c);
     }
@@ -232,18 +232,19 @@ function iterate(c, range) {
 
 function generateRandomImage() {
     clear();
-    var randComplex = new complex(NaN, NaN);
+    var randComplex = new Complex(NaN, NaN);
     var solution = false;
     var temporary_random_zoom = random();
+    console.log(temporary_random_zoom);
     refreshVariables(-temporary_random_zoom,temporary_random_zoom);
     while(!solution) { 
-        randComplex = new complex(-2+Math.random()*4,-2+Math.random()*4); 
+        randComplex = new Complex(-2+Math.random()*4,-2+Math.random()*4); 
         solution = iterate(randComplex, 25).is_finite();
     }
     var border_finite = 0;
     for(var i = -2; i <= 2; i++) {
         for(var j = -2; j <= 2; j++) {
-            if(new complex(randComplex.getReal() + randComplex.getReal()*i*per_iteration, randComplex.getImag() + randComplex.getImag()*j*per_iteration).is_finite()) { border_finite++; }
+            if(new Complex(randComplex.getReal() + randComplex.getReal()*i*per_iteration, randComplex.getImag() + randComplex.getImag()*j*per_iteration).is_finite()) { border_finite++; }
         }
     }
     if(border_finite/25 < 0.3) { generateRandomImage(); }
@@ -275,9 +276,8 @@ canvas.addEventListener('mousedown', function(e) {
 });
 
 const random = function() {
-    var zeros = Math.round(Math.random()*1/10*range);
-    console.log(zeros);
-    return Math.random()*2/10**zeros;
+    var zeros = Math.round(Math.random()*range*1/20);
+    return Math.random()*2/(10**zeros);
 }
 
 
