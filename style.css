@@ -1,0 +1,80 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins",sans-serif;
+}
+header {
+    color: blue;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100px;
+    padding: 0 5%;
+}
+header h1 {
+    color: white;
+    font-size: 60px;
+    font-weight: bold;
+}
+header nav {
+    display: flex;
+    gap: 30px;
+}
+
+header nav a {
+    color: white;
+    font-size: 20px;
+    text-decoration: none;
+    font-weight: bolder;
+    padding: 8px;
+    border-radius: 99px;
+    transition: 0.3s;
+}
+
+header nav a:hover {
+    background-color: lime;
+}
+
+body {
+    overflow: hidden;
+    background-color: rgb(36, 36, 36);
+}
+
+#main {
+    height: 1000px;
+    display: flex;
+    justify-content: center;
+}
+
+#buttondiv {
+    float: right;
+    width: 600px;
+    margin-top: 35%;
+}
+button {
+    font-weight: bold;
+    font-size: x-large;
+    margin: 4px;
+    color: lime;
+    width: 86%;
+    height: 60px;
+    background-color: rgb(40, 40, 40);
+    border: 5px solid lime;
+    border-radius: 10px;
+    transition: 0.3s;
+}
+
+button:hover {
+    background-color: rgb(58, 105, 142);
+}
+
+canvas {
+    margin: 20px;
+    border: 20px solid black;
+}
+
+hr {
+    border-color: lime;
+}
+

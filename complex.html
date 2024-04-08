@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1> Complex numbers </h1>
+        <nav>
+            <a href="julia.html">Julia</a>
+            <a href="mandelbrot.html">Mandelbrot</a>
+            <a href="complex.html">Complex Calculator</a>
+        </nav>
+    </header>
+    <hr>
+    
+    <div class ="input-overclass">
+        <input type="number" id="real1" class="inp" value="0">
+        <input type="number" id="imag1" class="inp" value="0">
+    </div>
+    <div class="input-overclass">
+        <input type="number" id="real2" class="inp" value="0">
+        <input type="number" id="imag2" class="inp" value="0">
+    </div>
+    <div id="third">
+        <button onclick="sendAdd()"> Addition </button>
+        <button onclick="sendMul()"> Multiplication </button>
+        <button onclick="sendAbs()"> Abs </button>
+        <button onclick="sendSqrt()"> Square </button>
+        <input id="output" readonly>
+    </div>
+    <script src="juliascript.js"></script>
+</body>
+</html>

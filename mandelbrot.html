@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mandelbrot</title>
+</head>
+<body>
+    <header>
+        <h1> Mandelbrot </h1>
+        <nav>
+            <a href="julia.html">Julia</a>
+            <a href="mandelbrot.html">Mandelbrot</a>
+            <a href="complex.html">Complex Calculator</a>
+        </nav>
+    </header>
+    <hr>
+    
+    <div id="main">
+        <canvas id="canvas1"></canvas>
+        <div id="buttondiv">
+        <button onclick="generateRandomImage();">random</button>
+        <button onclick="coordinate_system()">toggle coordinates</button>
+        <button onclick="restore()">restore default</button>
+        </div>
+    </div>
+    <script src="juliascript.js"></script>
+    <hr>
+    </body>
+</html>
