@@ -1,31 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="style.css">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mandelbrot</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grey & Lime Website</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        <h1> Mandelbrot </h1>
-        <nav>
-            <a href="julia.html">Julia</a>
-            <a href="mandelbrot.html">Mandelbrot</a>
-            <a href="complex.html">Complex Calculator</a>
-        </nav>
-    </header>
-    <hr>
-    
-    <div id="main">
-        <canvas id="canvas1"></canvas>
-        <div id="buttondiv">
-        <button onclick="generateRandomImage();">random</button>
-        <button onclick="coordinate_system()">toggle coordinates</button>
-        <button onclick="restore()">restore default</button>
-        </div>
+
+<div class="header">
+    <div class="title">
+        <h1>Mandelbrot</h1>
     </div>
-    <script src="juliascript.js"></script>
-    <hr>
-    </body>
+    <nav class="navbar">
+        <ul>
+            <li><a href="#">Mandelbrot</a></li>
+            <li><a href="#">Julia</a></li>
+            <li><a href="#">Complex Calculator</a></li>
+        </ul>
+    </nav>
+</div>
+
+<div class="canvas-container">
+    <canvas id="myCanvas" width="1000" height="1000"></canvas>
+    <div class="button-container">
+        <button class="button" onclick="restore()">Default</button>
+        <button class="button" onclick="coordinate_system()">Toggle Coordinates</button>
+        <button class="button" onclick="generateRandomImage()">Random Image</button>
+    </div>
+</div>
+<hr>
+<script src="juliascript.js"></script>
+
+</body>
 </html>
