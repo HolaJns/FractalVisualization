@@ -43,7 +43,7 @@ class Complex {
     }
 
     sqrt() {
-        return new complex(this.real*this.real-this.imag*this.imag, this.real*this.imag+this.imag*this.real);
+        return new Complex(this.real*this.real-this.imag*this.imag, this.real*this.imag+this.imag*this.real);
     }
 }
 
@@ -62,49 +62,7 @@ function multiply(a, b) {
 }
 
 
-function f(z,c) {
-    if(!z instanceof Complex ||!c instanceof Complex) {
-        throw "Parameters must be of type Complex";
-    }
-    return add(multiply(z,z),c);
-}
-
-
-
-function julia_set(c,canvas) {
-    let ctx = canvas.getContext("2d");
-    clear();
-    var solution = new complex(0,0);
-    ctx.beginPath();
-    ctx.moveTo(c.getReal()*250+500,c.getImag()*250+500);
-    for(var i = 0; i < 100; i++) {
-        ctx.lineTo(500+250*solution.getReal(), 500+250*solution.getImag());
-        solution = f(solution, c);
-    }
-    ctx.strokeStyle = "red";
-    ctx.lineWidth = "3";
-    ctx.stroke();
-}
-
-
-// lines on canvas
-
-const canvas = document.querySelector("canvas");
-canvas.width = 1000;
-canvas.height = 1000;
-/*
-canvas.addEventListener('mousemove', function(e) {
-    const x = e.offsetX;
-    const y = e.offsetY;
-    var comp = new complex((x-500)/250,(y-500)/250);
-    julia_set(comp, canvas);
-});
-*/
-
-
-
-
-// interactive buttons
+// interactive buttons used in complex.html
 
 function sendAdd() {
     let r1 = parseFloat(document.getElementById("real1").value);
@@ -140,6 +98,58 @@ function sendSqrt() {
     document.getElementById("output").value = a.sqrt();
 }
 
+
+//-----------------------------------------------------------------------
+
+const canvas = document.querySelector("canvas");
+const ctx = canvas.getContext("2d");
+canvas.width = 1000;
+canvas.height = 1000;
+
+
+//default function z = z^2+c
+function f(z,c) {
+    if(!z instanceof Complex ||!c instanceof Complex) {
+        throw "Parameters must be of type Complex";
+    }
+    return add(multiply(z,z),c);
+}
+
+function g(z, c) {
+    if(!z instanceof Complex ||!c instanceof Complex) {
+        throw "Parameters must be of type Complex";
+    }
+    return add(multiply(multiply(z,z),multiply(z,z)),c);
+}
+
+
+// lines on canvas
+
+//draws iteration-lines based on complex input
+function visualiseLines(c) {
+    var solution = new Complex(0,0);
+    ctx.beginPath();
+    ctx.moveTo(c.getReal()*canvas.width/distance+canvas.width/2,c.getImag()*canvas.height/distance+canvas.height/2);
+    for(var i = 0; i < 100; i++) {
+        ctx.lineTo(canvas.width/2+canvas.width/distance*solution.getReal(), canvas.height/2+canvas.height/distance*solution.getImag());
+        solution = f(solution, c);
+    }
+    ctx.strokeStyle = "red";
+    ctx.lineWidth = "3";
+    ctx.stroke();
+}
+
+/*
+canvas.addEventListener('mousemove', function(e) {
+    const x = e.clientX - e.offsetX;
+    const y = e.clientY - e.offsetY;
+    var comp = new Complex((x-canvas.width)/canvas.width/distance,(y-canvas.height)/canvas.height/distance);
+    visualiseLines(comp);
+});
+*/
+
+
+
 //coordinate-system
 
 let cords_active = false;
@@ -151,10 +161,10 @@ function coordinate_system() {
         ctx.fillStyle = "lime";
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(canvas.width/2,0);
-        ctx.lineTo(canvas.width/2,canvas.height);
-        ctx.moveTo(0,canvas.height/2);
-        ctx.lineTo(canvas.width,canvas.height/2);
+        ctx.moveTo(center[0]/per_iteration+canvas.width/2,0);
+        ctx.lineTo(center[0]/per_iteration+canvas.width/2,canvas.height);
+        ctx.moveTo(0,center[1]+canvas.height/2);
+        ctx.lineTo(center[0]+canvas.width,center[1]+canvas.height/2);
         
         var ct = -(distance/2-1);
         for(var i = 1; i < distance; i++) {
@@ -184,12 +194,12 @@ function coordinate_system() {
 var POV = [-2,2];
 var center = [0,0];
 var distance = POV[1]-POV[0];
-const range = 256;
-const ctx = canvas.getContext("2d");
+const range = 200;
 var pixels_dim = canvas.width;
 var per_iteration = distance / pixels_dim;
 
 
+//used to refresh POV, distance and per_iteration
 function refreshVariables(start=POV[0], end=POV[1]) {
     POV[0] = start;
     POV[1] = end;
@@ -198,19 +208,22 @@ function refreshVariables(start=POV[0], end=POV[1]) {
     console.log("POV: " + POV + "\ndistance: " + distance + "\nper_iteration: " + per_iteration);
 }
 
+//returns String of rgb-gradient in CSS format
 const color_gradient = function(depth) {
-    return "rgb("+(-depth/range*255)%255 + "," + (depth/range*255)%255 + "," + (255-depth/range*255)%255 + ")";
+    return "rgb("+(255/3*depth/range*255)%255 + "," + (2*255/3*depth/range*255)%255 + "," + (3*255/3*depth/range*255)%1 + ")";
 }
 
-function draw(centerX=center[0], centerY=center[1], start = POV[0], end = POV[1]) {
+
+//main function drawing the Mandelbrot-Set
+function draw() {
     
-    for (var row = start; row <= end; row += per_iteration) {
-        for (var column = start; column <= end; column += per_iteration) {
+    for (var row = POV[0]; row <= POV[1]; row += per_iteration) {
+        for (var column = POV[0]; column <= POV[1]; column += per_iteration) {
             var depth = 0;
             var solution = new Complex(0, 0);
             for (var iter = 0; iter < range; iter++) {
                 if (solution.abs() >= 1000) { break; }
-                solution = f(solution, new Complex(centerX + row, centerY + column));
+                solution = f(solution, new Complex(center[0] + row, center[1] + column));
                 depth++;
             }
             if(depth > 0*range) {
@@ -219,8 +232,12 @@ function draw(centerX=center[0], centerY=center[1], start = POV[0], end = POV[1]
             }
         }
     }
+    document.getElementById("Real").value = center[0];
+    document.getElementById("Imaginary").value = center[1];
+    document.getElementById("zoom").value = distance;
 }
 
+//iterates to to "range"
 function iterate(c, range) {
     var solution = new Complex(0,0);
     for(var i = 0; i < range; i++) {
@@ -229,7 +246,7 @@ function iterate(c, range) {
     return solution;
 }
 
-
+//generates a random image - TODO
 function generateRandomImage() {
     clear();
     var randComplex = new Complex(NaN, NaN);
@@ -242,12 +259,12 @@ function generateRandomImage() {
         solution = iterate(randComplex, 25).is_finite();
     }
     var border_finite = 0;
-    for(var i = -2; i <= 2; i++) {
-        for(var j = -2; j <= 2; j++) {
-            if(new Complex(randComplex.getReal() + randComplex.getReal()*i*per_iteration, randComplex.getImag() + randComplex.getImag()*j*per_iteration).is_finite()) { border_finite++; }
+    for(var i = -25; i <= 25; i++) {
+        for(var j = -25; j <= 25; j++) {
+            if(new Complex(randComplex.getReal() + i*per_iteration, randComplex.getImag() + j*per_iteration).is_finite()) { border_finite++; }
         }
     }
-    if(border_finite/25 < 0.3) { generateRandomImage(); }
+    if(border_finite/51**2 > 0.2) { generateRandomImage(); }
     else {
         console.log(randComplex.toString());
         center = [randComplex.getReal(),randComplex.getImag()];
@@ -255,6 +272,13 @@ function generateRandomImage() {
     }
 }
 
+//helping function - returns a random number with random numbers of zeroes
+const random = function() {
+    var zeros = Math.round(Math.random()*range*1/20);
+    return Math.random()*2/(10**zeros);
+}
+
+//zoom in and out
 canvas.addEventListener("wheel", function(e) {
     if(e.deltaY < 0) { refreshVariables(POV[0]*0.5,POV[1]*0.5); }
     if(e.deltaY > 0) { refreshVariables(POV[0]*2,POV[1]*2); }
@@ -264,6 +288,7 @@ canvas.addEventListener("wheel", function(e) {
     draw();
 });
 
+//set center coordinates based on cursor position
 canvas.addEventListener('mousedown', function(e) {
     var rect = canvas.getBoundingClientRect();
     const x = e.clientX-rect.left;
@@ -275,14 +300,12 @@ canvas.addEventListener('mousedown', function(e) {
     draw();
 });
 
-const random = function() {
-    var zeros = Math.round(Math.random()*range*1/20);
-    return Math.random()*2/(10**zeros);
-}
 
 
+//short ctx.clear()
 const clear = function() { ctx.clearRect(0,0,pixels_dim,pixels_dim); }
 
+//restore default image (center[0,0] & POV[-2,2])
 const restore = function() {
     center = [0,0];
     clear();
@@ -290,5 +313,6 @@ const restore = function() {
     draw();
 }
 
+//-------------------------------------------------//
 draw();
 //generateRandomImage();
