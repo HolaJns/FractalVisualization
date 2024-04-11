@@ -103,6 +103,7 @@ function sendSqrt() {
 
 const canvas = document.querySelector("canvas");
 const ctx = canvas.getContext("2d");
+const rect = canvas.getBoundingClientRect();
 canvas.width = 1000;
 canvas.height = 1000;
 
@@ -126,12 +127,34 @@ function g(z, c) {
 // lines on canvas
 
 //draws iteration-lines based on complex input
-function visualiseLines(c) {
+
+var backup_image;
+
+var linesActive = false;
+function toggleLines() {
+    if(!linesActive) {
+        linesActive = true;
+        canvas.addEventListener('mousemove', visualiseLines);
+    }
+    else {
+        linesActive = false;
+        canvas.removeEventListener("mousemove",visualiseLines);
+    }
+}
+
+//TODO - use bitmap
+function visualiseLines(e) {
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    console.log(x + " " + y);
+    const center_canvas_x = canvas.width/2;
+    const center_canvas_y = canvas.height/2;
+    var c = new Complex(center[0]+(x-canvas.width)/canvas.width/distance,center[1]+(y-canvas.height)/canvas.height/distance);
     var solution = new Complex(0,0);
     ctx.beginPath();
-    ctx.moveTo(c.getReal()*canvas.width/distance+canvas.width/2,c.getImag()*canvas.height/distance+canvas.height/2);
+    ctx.moveTo(center_canvas_x-c.getReal()*canvas.width/distance,center_canvas_y-c.getImag()*canvas.height/distance);
     for(var i = 0; i < 100; i++) {
-        ctx.lineTo(canvas.width/2+canvas.width/distance*solution.getReal(), canvas.height/2+canvas.height/distance*solution.getImag());
+        ctx.lineTo(center_canvas_x-canvas.width/distance*solution.getReal(), center_canvas_y-canvas.height/distance*solution.getImag());
         solution = f(solution, c);
     }
     ctx.strokeStyle = "red";
@@ -139,14 +162,6 @@ function visualiseLines(c) {
     ctx.stroke();
 }
 
-/*
-canvas.addEventListener('mousemove', function(e) {
-    const x = e.clientX - e.offsetX;
-    const y = e.clientY - e.offsetY;
-    var comp = new Complex((x-canvas.width)/canvas.width/distance,(y-canvas.height)/canvas.height/distance);
-    visualiseLines(comp);
-});
-*/
 
 
 
@@ -235,6 +250,7 @@ function draw() {
     document.getElementById("Real").value = center[0];
     document.getElementById("Imaginary").value = center[1];
     document.getElementById("zoom").value = distance;
+    backup_image = createImageBitmap(canvas);
 }
 
 //iterates to to "range"
@@ -290,7 +306,6 @@ canvas.addEventListener("wheel", function(e) {
 
 //set center coordinates based on cursor position
 canvas.addEventListener('mousedown', function(e) {
-    var rect = canvas.getBoundingClientRect();
     const x = e.clientX-rect.left;
     const y = e.clientY-rect.top;
     center[0] = (x-pixels_dim/2)*per_iteration+center[0];
