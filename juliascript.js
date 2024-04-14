@@ -106,6 +106,8 @@ const ctx = canvas.getContext("2d");
 const rect = canvas.getBoundingClientRect();
 canvas.width = 1000;
 canvas.height = 1000;
+const center_canvas_x = canvas.width/2;
+const center_canvas_y = canvas.height/2;
 
 
 //default function z = z^2+c
@@ -128,7 +130,7 @@ function g(z, c) {
 
 //draws iteration-lines based on complex input
 
-var backup_image;
+var backup_image = new Image();
 
 var linesActive = false;
 function toggleLines() {
@@ -139,23 +141,23 @@ function toggleLines() {
     else {
         linesActive = false;
         canvas.removeEventListener("mousemove",visualiseLines);
+        ctx.drawImage(backup_image,0,0);
     }
 }
 
 //TODO - use bitmap
 function visualiseLines(e) {
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    console.log(x + " " + y);
-    const center_canvas_x = canvas.width/2;
-    const center_canvas_y = canvas.height/2;
-    var c = new Complex(center[0]+(x-canvas.width)/canvas.width/distance,center[1]+(y-canvas.height)/canvas.height/distance);
-    var solution = new Complex(0,0);
+    ctx.drawImage(backup_image,0,0);
+    const x =  e.clientX - rect.left;
+    const y =  e.clientY - rect.top;
     ctx.beginPath();
-    ctx.moveTo(center_canvas_x-c.getReal()*canvas.width/distance,center_canvas_y-c.getImag()*canvas.height/distance);
+    ctx.moveTo(center_canvas_x-center[0]/per_iteration,center_canvas_y-center[1]/per_iteration);
+    //var c = new Complex(center[0]+(x-center_canvas_x)*per_iteration, center[1]+(y-center_canvas_y)*per_iteration);
+    //console.log(c.toString());
+    var solution = new Complex(0,0);
     for(var i = 0; i < 100; i++) {
-        ctx.lineTo(center_canvas_x-canvas.width/distance*solution.getReal(), center_canvas_y-canvas.height/distance*solution.getImag());
-        solution = f(solution, c);
+        ctx.lineTo(Math.abs(solution.getReal()/per_iteration+center_canvas_x),Math.abs(solution.getImag()/per_iteration+center_canvas_y));
+        solution = f(solution, new Complex(center[0]+(x-center_canvas_x)*per_iteration, center[1]+(y-center_canvas_y)*per_iteration));
     }
     ctx.strokeStyle = "red";
     ctx.lineWidth = "3";
@@ -176,22 +178,22 @@ function coordinate_system() {
         ctx.fillStyle = "lime";
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(center[0]/per_iteration+canvas.width/2,0);
-        ctx.lineTo(center[0]/per_iteration+canvas.width/2,canvas.height);
-        ctx.moveTo(0,center[1]+canvas.height/2);
-        ctx.lineTo(center[0]+canvas.width,center[1]+canvas.height/2);
+        ctx.moveTo(center[0]/per_iteration+center_canvas_x,0);
+        ctx.lineTo(center[0]/per_iteration+center_canvas_x,canvas.height);
+        ctx.moveTo(0,center[1]+center_canvas_y);
+        ctx.lineTo(center[0]+canvas.width,center[1]+center_canvas_y);
         
         var ct = -(distance/2-1);
         for(var i = 1; i < distance; i++) {
             if(ct != 0) {
-                ctx.fillText(ct, 0.5*i*canvas.width/(distance/2),canvas.height/2+20);
-                ctx.fillText(-ct, canvas.width/2-20,0.5*i*canvas.height/(distance/2));
+                ctx.fillText(ct, 0.5*i*canvas.width/(distance/2),center_canvas_y+20);
+                ctx.fillText(-ct, center_canvas_x-20,0.5*i*canvas.height/(distance/2));
             }
             ct = ct + 1;
-            ctx.moveTo(0.5*i*canvas.width/(distance/2),canvas.height/2-10);
-            ctx.lineTo(0.5*i*canvas.width/(distance/2),canvas.height/2+10);
-            ctx.moveTo(canvas.width/2-10,0.5*i*canvas.height/(distance/2));
-            ctx.lineTo(canvas.width/2+10,0.5*i*canvas.height/(distance/2));
+            ctx.moveTo(0.5*i*canvas.width/(distance/2),center_canvas_y-10);
+            ctx.lineTo(0.5*i*canvas.width/(distance/2),center_canvas_y+10);
+            ctx.moveTo(center_canvas_x-10,0.5*i*canvas.height/(distance/2));
+            ctx.lineTo(center_canvas_x+10,0.5*i*canvas.height/(distance/2));
         }
         ctx.stroke();
         cords_active = true;
@@ -209,7 +211,7 @@ function coordinate_system() {
 var POV = [-2,2];
 var center = [0,0];
 var distance = POV[1]-POV[0];
-const range = 200;
+const range = 100;
 var pixels_dim = canvas.width;
 var per_iteration = distance / pixels_dim;
 
@@ -225,7 +227,7 @@ function refreshVariables(start=POV[0], end=POV[1]) {
 
 //returns String of rgb-gradient in CSS format
 const color_gradient = function(depth) {
-    return "rgb("+(255/3*depth/range*255)%255 + "," + (2*255/3*depth/range*255)%255 + "," + (3*255/3*depth/range*255)%1 + ")";
+    return "rgb("+(255*depth/range)%1 + "," + (255*depth/range)%255 + "," + (255*depth/range)%1 + ")";
 }
 
 
@@ -243,14 +245,16 @@ function draw() {
             }
             if(depth > 0*range) {
                 ctx.fillStyle = color_gradient(depth);
-                ctx.fillRect(pixels_dim/2+row/per_iteration,pixels_dim/2+column/per_iteration,1,1);
+                ctx.fillRect(center_canvas_x+row/per_iteration,center_canvas_y+column/per_iteration,1,1);
             }
+            else ctx.fillStyle = "black";
+            
         }
     }
     document.getElementById("Real").value = center[0];
     document.getElementById("Imaginary").value = center[1];
     document.getElementById("zoom").value = distance;
-    backup_image = createImageBitmap(canvas);
+    backup_image.src = canvas.toDataURL();
 }
 
 //iterates to to "range"
@@ -296,11 +300,9 @@ const random = function() {
 
 //zoom in and out
 canvas.addEventListener("wheel", function(e) {
-    if(e.deltaY < 0) { refreshVariables(POV[0]*0.5,POV[1]*0.5); }
-    if(e.deltaY > 0) { refreshVariables(POV[0]*2,POV[1]*2); }
+    refreshVariables(POV[0]*2**(e.deltaY/100),POV[1]*2**(e.deltaY/100));
     console.log(e.deltaY);
     clear();
-    console.log(center);
     draw();
 });
 
@@ -308,8 +310,8 @@ canvas.addEventListener("wheel", function(e) {
 canvas.addEventListener('mousedown', function(e) {
     const x = e.clientX-rect.left;
     const y = e.clientY-rect.top;
-    center[0] = (x-pixels_dim/2)*per_iteration+center[0];
-    center[1] = (y-pixels_dim/2)*per_iteration+center[1];
+    center[0] = (x-center_canvas_x)*per_iteration+center[0];
+    center[1] = (y-center_canvas_y)*per_iteration+center[1];
     clear();
     console.log(center);
     draw();
