@@ -125,12 +125,18 @@ function g(z, c) {
     return add(multiply(multiply(z,z),multiply(z,z)),c);
 }
 
+function buringShip(z, c) {
+    if(!z instanceof Complex ||!c instanceof Complex) {
+        throw "Parameters must be of type Complex";
+    }
+    return add(multiply(new Complex(Math.abs(z.getReal()), Math.abs(z.getImag())), new Complex(Math.abs(z.getReal()), Math.abs(z.getImag()))), c);
+}
+
 
 // lines on canvas
 
 //draws iteration-lines based on complex input
 
-var backup_image = new Image();
 
 var linesActive = false;
 function toggleLines() {
@@ -141,13 +147,13 @@ function toggleLines() {
     else {
         linesActive = false;
         canvas.removeEventListener("mousemove",visualiseLines);
-        ctx.drawImage(backup_image,0,0);
+        ctx.drawImage(cache[generateCacheKey()],0,0);
     }
 }
 
 //TODO - use bitmap
 function visualiseLines(e) {
-    ctx.drawImage(backup_image,0,0);
+    ctx.drawImage(cache[generateCacheKey()],0,0);
     const x =  e.clientX - rect.left;
     const y =  e.clientY - rect.top;
     ctx.beginPath();
@@ -156,7 +162,7 @@ function visualiseLines(e) {
     //console.log(c.toString());
     var solution = new Complex(0,0);
     for(var i = 0; i < 100; i++) {
-        ctx.lineTo(Math.abs(solution.getReal()/per_iteration+center_canvas_x),Math.abs(solution.getImag()/per_iteration+center_canvas_y));
+        ctx.lineTo(Math.abs(solution.getReal()/per_iteration+center_canvas_x-center[0]/per_iteration),Math.abs(solution.getImag()/per_iteration+center_canvas_y-center[1]/per_iteration));
         solution = f(solution, new Complex(center[0]+(x-center_canvas_x)*per_iteration, center[1]+(y-center_canvas_y)*per_iteration));
     }
     ctx.strokeStyle = "red";
@@ -211,9 +217,10 @@ function coordinate_system() {
 var POV = [-2,2];
 var center = [0,0];
 var distance = POV[1]-POV[0];
-const range = 100;
+const range = 500;
 var pixels_dim = canvas.width;
 var per_iteration = distance / pixels_dim;
+var cache = {};
 
 
 //used to refresh POV, distance and per_iteration
@@ -233,6 +240,12 @@ const color_gradient = function(depth) {
 
 //main function drawing the Mandelbrot-Set
 function draw() {
+    if(generateCacheKey() in cache) {
+        console.log("hit");
+        ctx.drawImage(cache[generateCacheKey()], 0, 0);
+        return;
+    }
+    console.log("miss");
     
     for (var row = POV[0]; row <= POV[1]; row += per_iteration) {
         for (var column = POV[0]; column <= POV[1]; column += per_iteration) {
@@ -254,7 +267,9 @@ function draw() {
     document.getElementById("Real").value = center[0];
     document.getElementById("Imaginary").value = center[1];
     document.getElementById("zoom").value = distance;
+    var backup_image = new Image();
     backup_image.src = canvas.toDataURL();
+    cache[generateCacheKey()] = backup_image;
 }
 
 //iterates to to "range"
@@ -329,6 +344,14 @@ const restore = function() {
     refreshVariables(-2,2);
     draw();
 }
+
+function generateCacheKey() {
+    return String(distance) + ":" + String(center[0]) + ":" + String(center[1]);
+}
+
+function decodeKey(key) {
+    return key.split(":");
+} 
 
 //-------------------------------------------------//
 draw();
