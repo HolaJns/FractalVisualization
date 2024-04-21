@@ -10,34 +10,53 @@
 
 <div class="header">
     <div class="title">
-        <h1>Mandelbrot</h1>
+        <h1 id="title">Mandelbrot</h1>
     </div>
     <nav class="navbar">
         <ul>
-            <li><a href="#">Mandelbrot</a></li>
-            <li><a href="#">Julia</a></li>
-            <li><a href="#">Complex Calculator</a></li>
+            <button onclick='switchFunc("Mandelbrot")'>Mandelbrot</button>
+            <button onclick='switchFunc("Multiset")'>Multibrot</button>
+            <button onclick='switchFunc("Ship")'>Burning Ship</button>
         </ul>
     </nav>
 </div>
 
 <div class="canvas-container">
-    <canvas id="myCanvas" width="1000" height="1000"></canvas>
-    <div class="button-container">
-        <button class="button" onclick="restore()">Default</button>
-        <button class="button" onclick="coordinate_system()">Toggle Coordinates</button>
-        <button class="button" onclick="generateRandomImage()">Random Image</button>
-        <button class="button" onclick="toggleLines()">Toggle Lines</button>
-
-        <div class="input-container">
-            <input type="text" id="Real" readonly>
-            <input type="text" id="Imaginary" readonly>
-            <input type="text" id="zoom" readonly>
+    <div class="tutorial-container">
+        <h1> Instructions </h1>
+        <p> Use <b>SHIFT</b> + <b>MOUSE BUTTON</b> to select a new center. Center coordinates are displayed in the first two boxes.</p>
+        <p> Use <b>DOUBLE LEFT CLICK</b> or <b>MOUSE WHEEL UP</b> to zoom in. </p>
+        <p> Use <b>DOUBLE RIGHT CLICK</b> or <b>MOUSE WHEEL DOWN</b> to zoom out. Zoom is displayed in the third box.</p>
+        <p> Restore default by using <b>DEFAULT</b>.</p>
+        <p> Activate coordinate behavior by using <b>TOGGLE LINES</b>.</p>
+        <p> To download or copy the image copy the link in the fourth box.</p>
+        <p> Change precision on <b>ITERATIONS</b>. <b>WARNING: Higher iterations come with longer rendering times.</b></p>
+    </div>
+    <canvas id="canvas" width="1000" height="1000"></canvas>
+    <div class = "main">
+        <div class="button-container">
+            <button class="button" onclick="restore()">Default</button>
+            <button class="button" onclick="toggleLines()">Toggle Lines</button>
         </div>
-    </div> 
+        <div class="slider-container">
+            <input type="range" min="5" max="1000" value="500" id="slider">
+            <button value="Submit" onclick="confirm()" id="submit"/> Iterations: <span id="amtOutput"></span>
+        </div>
+        <div class="input-container">
+            Real:
+            <input type="text" id="Real" readonly>
+            Imagninary:
+            <input type="text" id="Imaginary" readonly>
+            Zoom:
+            <input type="text" id="zoom" readonly>
+            Image:
+            <input type="text" id="link" readonly>
+        </div>
+    </div>
 </div>
 <hr>
-<script src="juliascript.js"></script>
-
+<p id="credits">A project by Jonas Killian</p>
+<a id="credits" href="https://github.com/HolaJns">GitHub</li>
+<script src="script.js"></script>
 </body>
 </html>

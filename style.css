@@ -14,6 +14,21 @@ body {
 .navbar {
     display: flex;
 }
+.navbar button {
+    margin-right: 10px;
+    display: block;
+    color: grey;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    background-color: lime;
+    transition: 3ms;
+    border: 0cap;
+    font-size: x-large;
+}
+.navbar button:hover {
+    background-color:lightblue;
+}
 .navbar ul {
     display: flex;
     list-style-type: none;
@@ -39,20 +54,26 @@ body {
     text-align: center;
 }
 .canvas-container {
+    margin: 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 20px;
     width: 1200px;
+    gap: 150px;
 }
 canvas {
     border: 1px solid lightblue;
 }
-.button-container * {
+.main * {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+}
+.main {
+    background-color: rgb(173, 216, 230);
+    padding: 30px;
 }
 
 .button-container input {
@@ -60,8 +81,8 @@ canvas {
     border: 2px solid lightblue;
     margin-bottom: 10px;
     cursor: pointer;
-    width: 100%;
-    height: 100%;
+    width: 200px;
+    height: 30px;
 }
 
 .button-container input {
@@ -69,19 +90,56 @@ canvas {
 }
 
 .button {
+    background-color: rgb(0, 255, 0);
+    color: rgb(20, 20, 20);
+    border: none;
+    padding: 10px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    width: 200px;
+    height: 50px;
+    transition: 3ms;
+    font-weight: bold;
+    border: 2px solid black;
+}
+.button:hover {
+    background-color: rgb(110, 255, 0);
+}
+hr {
+    border-color: lime;
+}
+.input-container {
+    color: black;
+}
+.slider-container #submit {
     background-color: lime;
     color: rgb(20, 20, 20);
     border: none;
     padding: 10px;
     margin-bottom: 10px;
     cursor: pointer;
-    width: 100%;
-    height: 100%;
+    width: 200px;
+    height: 30px;
+    font-weight: bold;
+    border: 2px solid black;
+    height: 50px;
 }
-.button:hover {
+.slider-container {
+    color: lime;
+}
+.slider-container #submit:hover {
+    background-color: rgb(110, 255, 0);
+}
+.tutorial-container {
+    display: block;
+    padding: 20px;
     background-color: lightblue;
 }
-
-hr {
-    border-color: lime;
+#credits {
+    display: flex;
+    justify-content: center;
+    margin: 20px;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    font-weight: bold;
+    color: darkolivegreen;
 }

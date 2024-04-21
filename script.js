@@ -101,11 +101,11 @@ function sendSqrt() {
 
 //-----------------------------------------------------------------------
 
-const canvas = document.querySelector("canvas");
-const ctx = canvas.getContext("2d");
+var canvas = document.querySelector("canvas");
+canvas.width = 800;
+canvas.height = 800;
+var ctx = canvas.getContext("2d");
 const rect = canvas.getBoundingClientRect();
-canvas.width = 1000;
-canvas.height = 1000;
 const center_canvas_x = canvas.width/2;
 const center_canvas_y = canvas.height/2;
 
@@ -132,14 +132,33 @@ function buringShip(z, c) {
     return add(multiply(new Complex(Math.abs(z.getReal()), Math.abs(z.getImag())), new Complex(Math.abs(z.getReal()), Math.abs(z.getImag()))), c);
 }
 
+//function swapper
+var func = f;
+function switchFunc(mode) {
+    if(mode == "Mandelbrot") {
+        func = f;
+        swapHeadline("Mandebrot");
+    }
+    if(mode == "Ship") {
+        func = buringShip;
+        swapHeadline("Burning Ship");
+    }
+    if(mode == "Multiset") {
+        func = g;
+        swapHeadline("Mutlibrot");
+    }
+    memory = {};
+    draw();
+}
 
 // lines on canvas
 
-//draws iteration-lines based on complex input
-
-
+//visualize coordinate on cursor behavior
 var linesActive = false;
 function toggleLines() {
+    canvas = document.querySelector("canvas");
+    ctx = canvas.getContext("2d");
+    refreshVariables();
     if(!linesActive) {
         linesActive = true;
         canvas.addEventListener('mousemove', visualiseLines);
@@ -147,23 +166,21 @@ function toggleLines() {
     else {
         linesActive = false;
         canvas.removeEventListener("mousemove",visualiseLines);
-        ctx.drawImage(cache[generateCacheKey()],0,0);
+        ctx.drawImage(memory[generateCacheKey()],0,0);
     }
 }
 
-//TODO - use bitmap
+
 function visualiseLines(e) {
-    ctx.drawImage(cache[generateCacheKey()],0,0);
+    ctx.drawImage(memory[generateCacheKey()],0,0);
     const x =  e.clientX - rect.left;
     const y =  e.clientY - rect.top;
     ctx.beginPath();
-    ctx.moveTo(center_canvas_x-center[0]/per_iteration,center_canvas_y-center[1]/per_iteration);
-    //var c = new Complex(center[0]+(x-center_canvas_x)*per_iteration, center[1]+(y-center_canvas_y)*per_iteration);
-    //console.log(c.toString());
     var solution = new Complex(0,0);
+    ctx.moveTo(Math.abs(solution.getReal()/per_iteration+center_canvas_x-center[0]/per_iteration),Math.abs(solution.getImag()/per_iteration+center_canvas_y-center[1]/per_iteration));
     for(var i = 0; i < 100; i++) {
         ctx.lineTo(Math.abs(solution.getReal()/per_iteration+center_canvas_x-center[0]/per_iteration),Math.abs(solution.getImag()/per_iteration+center_canvas_y-center[1]/per_iteration));
-        solution = f(solution, new Complex(center[0]+(x-center_canvas_x)*per_iteration, center[1]+(y-center_canvas_y)*per_iteration));
+        solution = func(solution, new Complex(center[0]+(x-center_canvas_x)*per_iteration, center[1]+(y-center_canvas_y)*per_iteration));
     }
     ctx.strokeStyle = "red";
     ctx.lineWidth = "3";
@@ -171,56 +188,15 @@ function visualiseLines(e) {
 }
 
 
-
-
-//coordinate-system
-
-let cords_active = false;
-
-function coordinate_system() {
-    if(!cords_active) {
-        let ctx = canvas.getContext("2d");
-        ctx.strokeStyle = "lime";
-        ctx.fillStyle = "lime";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(center[0]/per_iteration+center_canvas_x,0);
-        ctx.lineTo(center[0]/per_iteration+center_canvas_x,canvas.height);
-        ctx.moveTo(0,center[1]+center_canvas_y);
-        ctx.lineTo(center[0]+canvas.width,center[1]+center_canvas_y);
-        
-        var ct = -(distance/2-1);
-        for(var i = 1; i < distance; i++) {
-            if(ct != 0) {
-                ctx.fillText(ct, 0.5*i*canvas.width/(distance/2),center_canvas_y+20);
-                ctx.fillText(-ct, center_canvas_x-20,0.5*i*canvas.height/(distance/2));
-            }
-            ct = ct + 1;
-            ctx.moveTo(0.5*i*canvas.width/(distance/2),center_canvas_y-10);
-            ctx.lineTo(0.5*i*canvas.width/(distance/2),center_canvas_y+10);
-            ctx.moveTo(center_canvas_x-10,0.5*i*canvas.height/(distance/2));
-            ctx.lineTo(center_canvas_x+10,0.5*i*canvas.height/(distance/2));
-        }
-        ctx.stroke();
-        cords_active = true;
-    }
-    else {
-        clear();
-        draw();
-        cords_active = false;
-    }
-}
-
-
-// Mandelbrot
+// visualisation of fractal
 
 var POV = [-2,2];
 var center = [0,0];
 var distance = POV[1]-POV[0];
-const range = 500;
+var range = 500;
 var pixels_dim = canvas.width;
 var per_iteration = distance / pixels_dim;
-var cache = {};
+var memory = {};
 
 
 //used to refresh POV, distance and per_iteration
@@ -229,31 +205,28 @@ function refreshVariables(start=POV[0], end=POV[1]) {
     POV[1] = end;
     distance = POV[1]-POV[0];
     per_iteration = distance / pixels_dim;
-    console.log("POV: " + POV + "\ndistance: " + distance + "\nper_iteration: " + per_iteration);
 }
 
 //returns String of rgb-gradient in CSS format
 const color_gradient = function(depth) {
-    return "rgb("+(255*depth/range)%1 + "," + (255*depth/range)%255 + "," + (255*depth/range)%1 + ")";
+    return "rgb("+(1*depth/range)%1 + "," + (255*depth/range*depth)%255 + "," + (1*depth/range)%1 + ")";
 }
 
 
 //main function drawing the Mandelbrot-Set
 function draw() {
-    if(generateCacheKey() in cache) {
-        console.log("hit");
-        ctx.drawImage(cache[generateCacheKey()], 0, 0);
+    if(generateCacheKey() in memory) {
+        ctx.drawImage(memory[generateCacheKey()], 0, 0);
         return;
     }
-    console.log("miss");
     
     for (var row = POV[0]; row <= POV[1]; row += per_iteration) {
         for (var column = POV[0]; column <= POV[1]; column += per_iteration) {
             var depth = 0;
             var solution = new Complex(0, 0);
             for (var iter = 0; iter < range; iter++) {
-                if (solution.abs() >= 1000) { break; }
-                solution = f(solution, new Complex(center[0] + row, center[1] + column));
+                if (solution.abs() >= 100) { break; }
+                solution = func(solution, new Complex(center[0] + row, center[1] + column));
                 depth++;
             }
             if(depth > 0*range) {
@@ -267,69 +240,46 @@ function draw() {
     document.getElementById("Real").value = center[0];
     document.getElementById("Imaginary").value = center[1];
     document.getElementById("zoom").value = distance;
+    var link = canvas.toDataURL();
+    document.getElementById("link").value = link;
     var backup_image = new Image();
-    backup_image.src = canvas.toDataURL();
-    cache[generateCacheKey()] = backup_image;
+    backup_image.src = link;
+    memory[generateCacheKey()] = backup_image;
 }
 
 //iterates to to "range"
 function iterate(c, range) {
     var solution = new Complex(0,0);
     for(var i = 0; i < range; i++) {
-        solution = f(solution, c);
+        solution = func(solution, c);
     }
     return solution;
-}
-
-//generates a random image - TODO
-function generateRandomImage() {
-    clear();
-    var randComplex = new Complex(NaN, NaN);
-    var solution = false;
-    var temporary_random_zoom = random();
-    console.log(temporary_random_zoom);
-    refreshVariables(-temporary_random_zoom,temporary_random_zoom);
-    while(!solution) { 
-        randComplex = new Complex(-2+Math.random()*4,-2+Math.random()*4); 
-        solution = iterate(randComplex, 25).is_finite();
-    }
-    var border_finite = 0;
-    for(var i = -25; i <= 25; i++) {
-        for(var j = -25; j <= 25; j++) {
-            if(new Complex(randComplex.getReal() + i*per_iteration, randComplex.getImag() + j*per_iteration).is_finite()) { border_finite++; }
-        }
-    }
-    if(border_finite/51**2 > 0.2) { generateRandomImage(); }
-    else {
-        console.log(randComplex.toString());
-        center = [randComplex.getReal(),randComplex.getImag()];
-        draw();
-    }
-}
-
-//helping function - returns a random number with random numbers of zeroes
-const random = function() {
-    var zeros = Math.round(Math.random()*range*1/20);
-    return Math.random()*2/(10**zeros);
 }
 
 //zoom in and out
 canvas.addEventListener("wheel", function(e) {
     refreshVariables(POV[0]*2**(e.deltaY/100),POV[1]*2**(e.deltaY/100));
-    console.log(e.deltaY);
     clear();
     draw();
 });
 
+
 //set center coordinates based on cursor position
 canvas.addEventListener('mousedown', function(e) {
-    const x = e.clientX-rect.left;
-    const y = e.clientY-rect.top;
-    center[0] = (x-center_canvas_x)*per_iteration+center[0];
-    center[1] = (y-center_canvas_y)*per_iteration+center[1];
-    clear();
-    console.log(center);
-    draw();
+    if(e.shiftKey) {
+        const x = e.clientX-rect.left;
+        const y = e.clientY-rect.top;
+        center[0] = (x-center_canvas_x)*per_iteration+center[0];
+        center[1] = (y-center_canvas_y)*per_iteration+center[1];
+        clear();
+        draw();
+    }
+    else if(e.detail == 2) {
+        if(e.button == 2) refreshVariables(POV[0]*2,POV[1]*2);
+        else if(e.button == 0) refreshVariables(POV[0]*0.5,POV[1]*0.5);
+        clear();
+        draw();
+    }
 });
 
 
@@ -353,6 +303,32 @@ function decodeKey(key) {
     return key.split(":");
 } 
 
+canvas.oncontextmenu = function(e) { e.preventDefault(); e.stopPropagation(); }
+
+//slider functions - iteration input
+var sliderUnit = document.getElementById("slider"); 
+var outputUnit = document.getElementById("amtOutput");
+var a = 500;
+outputUnit.innerHTML = sliderUnit.value;
+sliderUnit.oninput = function() {
+    outputUnit.innerHTML = this.value;
+    a = this.value;
+}
+function confirm() {
+    if(a != range) {
+        memory = {};
+        range = a;
+        restore();
+    }
+}
+
+function swapHeadline(str) {
+    if(str != "Mandelbrot" && str != "Burning Ship" && str != "Multibrot") {
+        console.error("Error. Unsupported fractal title");
+        return;
+    }
+    document.getElementById("title").innerHTML = str;
+}
+
 //-------------------------------------------------//
 draw();
-//generateRandomImage();
