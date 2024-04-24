@@ -105,6 +105,13 @@ canvas {
 .button:hover {
     background-color: rgb(110, 255, 0);
 }
+#toggleLines {
+    background-color: lime;
+    transition: 3ms;
+}
+#toggleLines:hover {
+    background-color: rgb(110, 255, 0);
+}
 hr {
     border-color: lime;
 }

@@ -164,10 +164,12 @@ function toggleLines() {
     ctx = canvas.getContext("2d");
     refreshVariables();
     if(!linesActive) {
+        document.getElementById("toggleLines").style.backgroundColor = "rgb(150, 255, 0)";
         linesActive = true;
         canvas.addEventListener('mousemove', visualiseLines);
     }
     else {
+        document.getElementById("toggleLines").style.backgroundColor = "lime";
         linesActive = false;
         canvas.removeEventListener("mousemove",visualiseLines);
         ctx.drawImage(memory[generateCacheKey()],0,0);
