@@ -107,6 +107,7 @@ canvas.height = 800;
 var ctx = canvas.getContext("2d");
 const center_canvas_x = canvas.width/2;
 const center_canvas_y = canvas.height/2;
+var rect = canvas.getBoundingClientRect();
 
 
 //default function z = z^2+c
@@ -134,17 +135,21 @@ function buringShip(z, c) {
 //function swapper
 var func = f;
 function switchFunc(mode) {
+    if(mode !== "Mandelbrot" && mode !== "Burning Ship" && mode !== "Multibrot") {
+        console.error("Error. Unsupported fractal title");
+        return;
+    }
     if(mode == "Mandelbrot") {
         func = f;
-        swapHeadline("Mandebrot");
+        document.getElementById("title").innerHTML = mode;
     }
-    if(mode == "Ship") {
+    if(mode == "Burning Ship") {
         func = buringShip;
-        swapHeadline("Burning Ship");
+        document.getElementById("title").innerHTML = mode;
     }
-    if(mode == "Multiset") {
+    if(mode == "Multibrot") {
         func = g;
-        swapHeadline("Mutlibrot");
+        document.getElementById("title").innerHTML = mode;
     }
     memory = {};
     draw();
@@ -172,7 +177,7 @@ function toggleLines() {
 
 function visualiseLines(e) {
     ctx.drawImage(memory[generateCacheKey()],0,0);
-    const rect = canvas.getBoundingClientRect();
+    rect = canvas.getBoundingClientRect();
     const x =  e.clientX - rect.left;
     const y =  e.clientY - rect.top;
     ctx.beginPath();
@@ -322,13 +327,7 @@ function confirm() {
     }
 }
 
-function swapHeadline(str) {
-    if(str != "Mandelbrot" && str != "Burning Ship" && str != "Multibrot") {
-        console.error("Error. Unsupported fractal title");
-        return;
-    }
-    document.getElementById("title").innerHTML = str;
-}
+
 
 //-------------------------------------------------//
 draw();
