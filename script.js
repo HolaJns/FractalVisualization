@@ -105,7 +105,6 @@ var canvas = document.querySelector("canvas");
 canvas.width = 800;
 canvas.height = 800;
 var ctx = canvas.getContext("2d");
-const rect = canvas.getBoundingClientRect();
 const center_canvas_x = canvas.width/2;
 const center_canvas_y = canvas.height/2;
 
@@ -173,6 +172,7 @@ function toggleLines() {
 
 function visualiseLines(e) {
     ctx.drawImage(memory[generateCacheKey()],0,0);
+    const rect = canvas.getBoundingClientRect();
     const x =  e.clientX - rect.left;
     const y =  e.clientY - rect.top;
     ctx.beginPath();
