@@ -224,6 +224,9 @@ const color_gradient = function(depth) {
 function draw() {
     if(generateCacheKey() in memory) {
         ctx.drawImage(memory[generateCacheKey()], 0, 0);
+        document.getElementById("Real").value = center[0];
+        document.getElementById("Imaginary").value = center[1];
+        document.getElementById("zoom").value = distance;
         return;
     }
     
@@ -329,6 +332,11 @@ function confirm() {
     }
 }
 
+function sendCoordinates() {
+    center = [parseFloat(document.getElementById("Real").value.replace(".",".")), parseFloat(document.getElementById("Imaginary").value.replace(".","."))];
+    refreshVariables();
+    draw();
+}
 
 
 //-------------------------------------------------//

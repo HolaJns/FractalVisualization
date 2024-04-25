@@ -94,7 +94,7 @@ canvas {
     color: rgb(20, 20, 20);
     border: none;
     padding: 10px;
-    margin-bottom: 10px;
+    margin: 10px;
     cursor: pointer;
     width: 200px;
     height: 50px;
@@ -117,6 +117,7 @@ hr {
 }
 .input-container {
     color: black;
+    margin: 30px;
 }
 .slider-container #submit {
     background-color: lime;
@@ -139,7 +140,7 @@ hr {
 }
 .tutorial-container {
     display: block;
-    padding: 20px;
+    padding: 50px;
     background-color: lightblue;
 }
 #credits {
