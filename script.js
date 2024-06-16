@@ -134,7 +134,9 @@ function buringShip(z, c) {
 
 //function swapper
 var func = f;
+var md = "Mandelbrot";
 function switchFunc(mode) {
+    md = mode;
     if(mode !== "Mandelbrot" && mode !== "Burning Ship" && mode !== "Multibrot") {
         console.error("Error. Unsupported fractal title");
         return;
@@ -189,7 +191,7 @@ function visualiseLines(e) {
         ctx.lineTo(Math.abs(solution.getReal()/per_iteration+center_canvas_x-center[0]/per_iteration),Math.abs(solution.getImag()/per_iteration+center_canvas_y-center[1]/per_iteration));
         solution = func(solution, new Complex(center[0]+(x-center_canvas_x)*per_iteration, center[1]+(y-center_canvas_y)*per_iteration));
     }
-    ctx.strokeStyle = "red";
+    ctx.strokeStyle = "lime";
     ctx.lineWidth = "3";
     ctx.stroke();
 }
@@ -214,12 +216,6 @@ function refreshVariables(start=POV[0], end=POV[1]) {
     per_iteration = distance / pixels_dim;
 }
 
-//returns String of rgb-gradient in CSS format
-const color_gradient = function(depth) {
-    return "rgb("+(1*depth/range)%1 + "," + (255*depth/range*depth)%255 + "," + (1*depth/range)%1 + ")";
-}
-
-
 //main function drawing the Mandelbrot-Set
 function draw() {
     if(generateCacheKey() in memory) {
@@ -230,31 +226,46 @@ function draw() {
         return;
     }
     
-    for (var row = POV[0]; row <= POV[1]; row += per_iteration) {
-        for (var column = POV[0]; column <= POV[1]; column += per_iteration) {
-            var depth = 0;
-            var solution = new Complex(0, 0);
-            for (var iter = 0; iter < range; iter++) {
-                if (solution.abs() >= 100) { break; }
-                solution = func(solution, new Complex(center[0] + row, center[1] + column));
-                depth++;
+   const wk1 = new Worker("worker.js");
+   const wk2 = new Worker("worker.js");
+   const wk3 = new Worker("worker.js");
+   const wk4 = new Worker("worker.js");
+   wk1.postMessage([1,POV,per_iteration, center_canvas_x, center_canvas_y, center, range, md]);
+   wk2.postMessage([2,POV,per_iteration, center_canvas_x, center_canvas_y, center, range, md]);
+   wk3.postMessage([3,POV,per_iteration, center_canvas_x, center_canvas_y, center, range, md]);
+   wk4.postMessage([4,POV,per_iteration, center_canvas_x, center_canvas_y, center, range, md]);
+
+
+   var bitmaps = [];
+   function messageReciever(message) {
+        var im = message.data[0]
+        var split = message.data[1]
+        bitmaps.push([split,im])
+        if(bitmaps.length == 4) {
+            for(var i = 0; i < 4; i++) {
+                ctx.drawImage(bitmaps[i][1],(bitmaps[i][0])*POV[0]/4, (bitmaps[i][0])*POV[1]/4)
             }
-            if(depth > 0*range) {
-                ctx.fillStyle = color_gradient(depth);
-                ctx.fillRect(center_canvas_x+row/per_iteration,center_canvas_y+column/per_iteration,1,1);
-            }
-            else ctx.fillStyle = "black";
-            
+            var image = new Image();
+            image.src = canvas.toDataURL();
+            memory[generateCacheKey()] = image;
+            bitmaps = [];
         }
-    }
-    document.getElementById("Real").value = center[0];
-    document.getElementById("Imaginary").value = center[1];
-    document.getElementById("zoom").value = distance;
-    var link = canvas.toDataURL();
-    document.getElementById("link").value = link;
-    var backup_image = new Image();
-    backup_image.src = link;
-    memory[generateCacheKey()] = backup_image;
+       ctx.drawImage(im, split*POV[0]/4,split*POV[1]/4);
+   }
+
+   wk1.addEventListener("message", messageReciever);
+   wk2.addEventListener("message", messageReciever);
+   wk3.addEventListener("message", messageReciever);
+   wk4.addEventListener("message", messageReciever);
+
+   document.getElementById("Real").value = center[0];
+   document.getElementById("Imaginary").value = center[1];
+   document.getElementById("zoom").value = distance;
+   var link = canvas.toDataURL();
+   document.getElementById("link").value = link;
+   var backup_image = new Image();
+   backup_image.src = link;
+   memory[generateCacheKey()] = backup_image;
 }
 
 //iterates to to "range"
@@ -267,7 +278,7 @@ function iterate(c, range) {
 }
 
 //zoom in and out
-canvas.addEventListener("wheel", function(e) {
+canvas.addEventListener("mousewheel", function(e) {
     refreshVariables(POV[0]*2**(e.deltaY/100),POV[1]*2**(e.deltaY/100));
     clear();
     draw();
