@@ -179,21 +179,24 @@ function toggleLines() {
 }
 
 
+var rendering = true;
 function visualiseLines(e) {
-    ctx.drawImage(memory[generateCacheKey()],0,0);
-    rect = canvas.getBoundingClientRect();
-    const x =  e.clientX - rect.left;
-    const y =  e.clientY - rect.top;
-    ctx.beginPath();
-    var solution = new Complex(0,0);
-    ctx.moveTo(Math.abs(solution.getReal()/per_iteration+center_canvas_x-center[0]/per_iteration),Math.abs(solution.getImag()/per_iteration+center_canvas_y-center[1]/per_iteration));
-    for(var i = 0; i < 100; i++) {
-        ctx.lineTo(Math.abs(solution.getReal()/per_iteration+center_canvas_x-center[0]/per_iteration),Math.abs(solution.getImag()/per_iteration+center_canvas_y-center[1]/per_iteration));
-        solution = func(solution, new Complex(center[0]+(x-center_canvas_x)*per_iteration, center[1]+(y-center_canvas_y)*per_iteration));
+    if(!rendering) {
+        ctx.drawImage(memory[generateCacheKey()],0,0);
+        rect = canvas.getBoundingClientRect();
+        const x =  e.clientX - rect.left;
+        const y =  e.clientY - rect.top;
+        ctx.beginPath();
+        var solution = new Complex(0,0);
+        ctx.moveTo(Math.abs(solution.getReal()/per_iteration+center_canvas_x-center[0]/per_iteration),Math.abs(solution.getImag()/per_iteration+center_canvas_y-center[1]/per_iteration));
+        for(var i = 0; i < 100; i++) {
+            ctx.lineTo(Math.abs(solution.getReal()/per_iteration+center_canvas_x-center[0]/per_iteration),Math.abs(solution.getImag()/per_iteration+center_canvas_y-center[1]/per_iteration));
+            solution = func(solution, new Complex(center[0]+(x-center_canvas_x)*per_iteration, center[1]+(y-center_canvas_y)*per_iteration));
+        }
+        ctx.strokeStyle = "lime";
+        ctx.lineWidth = "3";
+        ctx.stroke();
     }
-    ctx.strokeStyle = "lime";
-    ctx.lineWidth = "3";
-    ctx.stroke();
 }
 
 
@@ -235,9 +238,9 @@ function draw() {
    wk3.postMessage([3,POV,per_iteration, center_canvas_x, center_canvas_y, center, range, md]);
    wk4.postMessage([4,POV,per_iteration, center_canvas_x, center_canvas_y, center, range, md]);
 
-
    var bitmaps = [];
    function messageReciever(message) {
+        rendering = true;
         var im = message.data[0]
         var split = message.data[1]
         bitmaps.push([split,im])
@@ -249,7 +252,9 @@ function draw() {
             image.src = canvas.toDataURL();
             memory[generateCacheKey()] = image;
             bitmaps = [];
+            rendering = false;
         }
+        document.getElementById("link").value = canvas.toDataURL();
        ctx.drawImage(im, split*POV[0]/4,split*POV[1]/4);
    }
 
@@ -261,11 +266,6 @@ function draw() {
    document.getElementById("Real").value = center[0];
    document.getElementById("Imaginary").value = center[1];
    document.getElementById("zoom").value = distance;
-   var link = canvas.toDataURL();
-   document.getElementById("link").value = link;
-   var backup_image = new Image();
-   backup_image.src = link;
-   memory[generateCacheKey()] = backup_image;
 }
 
 //iterates to to "range"
@@ -312,6 +312,7 @@ const clear = function() { ctx.clearRect(0,0,pixels_dim,pixels_dim); }
 const restore = function() {
     center = [0,0];
     clear();
+    bitmaps = [];
     refreshVariables(-2,2);
     draw();
 }
