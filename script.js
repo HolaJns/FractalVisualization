@@ -219,6 +219,10 @@ function refreshVariables(start=POV[0], end=POV[1]) {
     per_iteration = distance / pixels_dim;
 }
 
+var wk1 = new Worker("worker.js");
+var wk2 = new Worker("worker.js");
+var wk3 = new Worker("worker.js");
+var wk4 = new Worker("worker.js");
 //main function drawing the Mandelbrot-Set
 function draw() {
     if(generateCacheKey() in memory) {
@@ -228,11 +232,15 @@ function draw() {
         document.getElementById("zoom").value = distance;
         return;
     }
-    
-   const wk1 = new Worker("worker.js");
-   const wk2 = new Worker("worker.js");
-   const wk3 = new Worker("worker.js");
-   const wk4 = new Worker("worker.js");
+    wk1.dispatchEvent
+    wk2.terminate();
+    wk3.terminate();
+    wk4.terminate();
+    wk1 = new Worker("worker.js");
+    wk2 = new Worker("worker.js");
+    wk3 = new Worker("worker.js");
+    wk4 = new Worker("worker.js");
+   
    wk1.postMessage([1,POV,per_iteration, center_canvas_x, center_canvas_y, center, range, md]);
    wk2.postMessage([2,POV,per_iteration, center_canvas_x, center_canvas_y, center, range, md]);
    wk3.postMessage([3,POV,per_iteration, center_canvas_x, center_canvas_y, center, range, md]);
